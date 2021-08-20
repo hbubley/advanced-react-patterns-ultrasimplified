@@ -6,10 +6,23 @@ import mojs from 'mo-js'
 const withClapAnimation = WrappedComponent => {
   class WithClapAnimation extends Component {
     //this handles animation logic
+    animationTimeline = new mojs.Timeline()
     state = {
-      animationTimeline: new mojs.Timeline()
+      animationTimeline: this.animationTimeline
     }
 
+    componentDidMount() {
+      const scaleButton = new mojs.Html({
+        el: '#clap',
+        duration: 300,
+        scale: { 1.3: 1 },
+        easing: mojs.easing.ease.out,
+
+      })
+
+      const newAnimationTimeline = this.animationTimeline.add([scaleButton])
+      this.setState({ animationTimeline: newAnimationTimeline })
+    }
     render() {
       return <WrappedComponent {...this.props} animationTimeline={this.state.animationTimeline} />
     }
@@ -29,7 +42,7 @@ const MediumClap = ({ animationTimeline }) => {
   const { isClicked, count, countTotal } = clapState;
 
   const handleClapClick = () => {
-    animate()
+    animationTimeline.replay()
     setClapState((prevState) => ({
       isClicked: true,
       //math min will take in both values and evaluate which value is the minimum, it will then return the minimum value.
@@ -38,7 +51,7 @@ const MediumClap = ({ animationTimeline }) => {
       countTotal: prevState.count < MAXIMUM_USER_CLAP ? prevState.countTotal + 1 : prevState.countTotal
     }))
   }
-  return <button className={styles.clap} onClick={handleClapClick}>
+  return <button id='clap' className={styles.clap} onClick={handleClapClick}>
     <ClapIcon isClicked={isClicked} />
     <ClapCount count={count} />
     <ClapTotal countTotal={countTotal} />
